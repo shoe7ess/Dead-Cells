@@ -1,0 +1,49 @@
+// Automate PAKTool for Dead Cells
+SETLOCAL ENABLEEXTENSIONS
+
+
+REM =======================================================================================================================
+REM =========== Change the drives below to match your current Dead Cells directory everyting up to steamapps ==============
+REM =======================================================================================================================
+
+if not exist "X:\Games\Steam\steamapps\common\Dead Cells\ModTools\Working Folder" mkdir X:\Games\Steam\steamapps\common\Dead Cells\ModTools\Working Folder
+if not exist "X:\Games\Steam\steamapps\common\Dead Cells\ModTools\Working\Repack" mkdir X:\Games\Steam\steamapps\common\Dead Cells\ModTools\Working Folder
+
+set "WorkingFolder=X:\Games\Steam\steamapps\common\Dead Cells\ModTools\Working Folder"
+set "ModTools=X:\Games\Steam\steamapps\common\Dead Cells\ModTools"
+set "RefPakOutput=X:\Games\Steam\steamapps\common\Dead Cells\ModTools\Working Folder\res.pak"
+set "BasePak=X:\Games\Steam\steamapps\common\Dead Cells\res.pak"
+
+ECHO By default this script will create a working folder at %WorkingFolder%
+
+@echo off
+
+REM The base Res.pak is now in ../ModTools/Working Folder
+
+cd %ModTools%
+CHOICE /C 123 /N /M "1 = Unpack base res.pak, 2 = Repack to res.pak, 3 = Creates an updated res.pak based off changes made to original .pak files"
+
+IF ERRORLEVEL 3 GOTO ModdedRepack
+IF ERRORLEVEL 2 GOTO Repack
+IF ERRORLEVEL 1 GOTO Unpack
+
+:ModdedRepack
+PAKTool -CreateDiffPak -refpak "%BasePak%" -indir "%WorkingFolder%" -outPak "%RefPakOutput%"
+ECHO Repacking all modded files and overwriting the base ref.pak with any changes
+TIMEOUT /T 6
+GOTO End
+
+REM ========== For some reason repacking a non-edited res.pak throws an error tha the output .pak is always in use for some reason. Seeing as how this tool is more often used to extract the original res.pak and to mod these resources I'm leaving those two in. If someone knows a fix for this error either let me know.
+REM :Repack
+REM PAKTool -Collapse -refpak "%BasePak%" -indir "%WorkingFolder%" -outpak "%RefPakOutput%"
+REM ECHO Repacking ref.pak in your working folder
+REM GOTO End
+REM TIMEOUT /T 6
+
+:Unpack
+PAKTool -Expand -outdir "%WorkingFolder%" -refpak "%BasePak%"
+ECHO Repacking all modded files and overwriting the base ref.pak with any changes
+TIMEOUT /T 3
+GOTO End
+
+:End
